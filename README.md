@@ -203,11 +203,18 @@ ID_117 PROJECT/
 - **Node.js**: v18 or newer (v24+ tested)
 - **npm**: v9+ (npm 11+ tested)
 
-### One-Click Startup (PowerShell)
+### One-Click Unified Startup (Single Server for Frontend + Backend)
 From the project root directory, run:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\run_local.ps1
 ```
+This automatically serves both the **Frontend Web App** and the **Backend API** together on a single URL:
+- **Application & UI:** `http://127.0.0.1:8000`
+- **Backend API:** `http://127.0.0.1:8000/api/v1`
+- **Swagger Docs:** `http://127.0.0.1:8000/docs`
+- **Health Check:** `http://127.0.0.1:8000/health`
+
+*(To run with separate Vite HMR dev server instead, pass `-Dev`: `.\run_local.ps1 -Dev`)*
 
 ---
 
