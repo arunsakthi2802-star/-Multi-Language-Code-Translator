@@ -344,10 +344,35 @@ Arbitrary code execution on the host machine is strictly disabled by default.
 
 ---
 
-## 11. Known Limitations
+## 11. Vercel Deployment Guide
 
-1. **External AI Quota**: When the OpenAI API key has 0 remaining credits (HTTP 429), the platform automatically falls back to the deterministic rule-based engine for supported language pairs and displays an honest limitation warning.
-2. **Compiler Diagnostics**: Full compilation checks for C/C++/Java require native compilers (`gcc`, `clang`, `javac`) to be installed on the host OS. When absent, the validator runs structural bracket and grammar analysis and accurately reports compiler absence.
+The application is pre-configured and optimized for deployment on [Vercel](https://vercel.com).
+
+### Option 1: Frontend SPA on Vercel (Recommended)
+1. Import your GitHub repository `https://github.com/arunsakthi2802-star/-Multi-Language-Code-Translator` into Vercel.
+2. In Project Settings:
+   - **Root Directory**: `frontend`
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Add Environment Variable:
+   - `VITE_API_BASE_URL`: URL of your deployed backend (e.g. `https://your-backend.onrender.com/api/v1`) or leave default if using serverless rewrites.
+4. Deploy! `frontend/vercel.json` automatically manages client-side SPA routing (`/translator`, `/history`, etc.) without 404 errors.
+
+### Option 2: Fullstack Monorepo on Vercel
+1. Import the repository root directly into Vercel.
+2. The root [vercel.json](file:///c:/Users/aruns/OneDrive/Desktop/arsha%20resources/ID_117%20PROJECT/vercel.json) and [api/index.py](file:///c:/Users/aruns/OneDrive/Desktop/arsha%20resources/ID_117%20PROJECT/api/index.py) configure both the static Vite frontend build and the Python FastAPI API endpoints automatically.
+3. Configure your `GEMINI_API_KEY` or `OPENAI_API_KEY` under **Settings > Environment Variables**.
+
+---
+
+## 12. Known Limitations
+
+1. **AI Quota**: If an API key has 0 remaining credits or is invalid, the platform automatically routes supported pairs through the deterministic rule-based fallback engine.
+2. **Compiler Diagnostics**: Native C/C++/Java diagnostics require `gcc`/`clang`/`javac` installed on the host OS. When absent, the validator applies structural AST and bracket analysis and accurately reports compiler absence.
 3. **Sandbox Execution**: Requires Docker Desktop on Windows. When Docker is not installed, the sandbox capability reports `sandbox_docker_available: false` and safely disables execution.
 
+---
+
 # -Multi-Language-Code-Translator
+
