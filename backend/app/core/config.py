@@ -20,7 +20,8 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")) # 24 hours
     
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'translator.db'}")
+    _default_db = "sqlite:////tmp/translator.db" if (os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME")) else f"sqlite:///{BASE_DIR / 'translator.db'}"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", _default_db)
     
     # AI Provider configuration
     # Default provider: 'gemini', 'openai', 'ollama', or 'rule_based'
