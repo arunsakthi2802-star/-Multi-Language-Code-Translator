@@ -47,7 +47,7 @@ export const Translator: React.FC = () => {
 
   // Translation Options
   const [style, setStyle] = useState('idiomatic');
-  const [provider, setProvider] = useState<'openai' | 'ollama' | 'rule_based'>('openai');
+  const [provider, setProvider] = useState<'gemini' | 'openai' | 'ollama' | 'rule_based'>('gemini');
   const [options, setOptions] = useState<TranslationOptions>({
     preserve_comments: true,
     add_explanatory_comments: false,
@@ -276,6 +276,7 @@ export const Translator: React.FC = () => {
             className="hidden sm:block bg-[#161925] border border-[#262b3d] rounded-lg px-2.5 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-indigo-500"
             title="Select translation engine"
           >
+            <option value="gemini">Google Gemini (Default)</option>
             <option value="openai">OpenAI (gpt-4o-mini)</option>
             <option value="rule_based">Rule-Based Fallback</option>
             <option value="ollama">Ollama (Local Model)</option>

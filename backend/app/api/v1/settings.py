@@ -55,14 +55,19 @@ def update_user_settings(
     db.refresh(s)
     return s
 
+from app.providers.gemini import GeminiProvider
+
 @router.post("/test-connection")
 async def test_provider_connection(payload: dict):
-    provider = payload.get("provider", "openai")
+    provider = payload.get("provider", "gemini")
     api_key = payload.get("api_key") # optional override for test
     base_url = payload.get("base_url")
     model = payload.get("model")
 
-    if provider == "openai":
+    if provider == "gemini":
+        p = GeminiProvider(api_key=api_key, model=model)
+        return await p.test_connection()
+    elif provider == "openai":
         p = OpenAICompatibleProvider(api_key=api_key, base_url=base_url, model=model)
         return await p.test_connection()
     elif provider == "ollama":

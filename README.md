@@ -349,3 +349,5 @@ Arbitrary code execution on the host machine is strictly disabled by default.
 1. **External AI Quota**: When the OpenAI API key has 0 remaining credits (HTTP 429), the platform automatically falls back to the deterministic rule-based engine for supported language pairs and displays an honest limitation warning.
 2. **Compiler Diagnostics**: Full compilation checks for C/C++/Java require native compilers (`gcc`, `clang`, `javac`) to be installed on the host OS. When absent, the validator runs structural bracket and grammar analysis and accurately reports compiler absence.
 3. **Sandbox Execution**: Requires Docker Desktop on Windows. When Docker is not installed, the sandbox capability reports `sandbox_docker_available: false` and safely disables execution.
+
+# -Multi-Language-Code-Translator

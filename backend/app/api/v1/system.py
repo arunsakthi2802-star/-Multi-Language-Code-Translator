@@ -25,6 +25,7 @@ def get_system_status(db: Session = Depends(get_db)):
         "service": settings.PROJECT_NAME,
         "database": "connected" if db_ok else "disconnected",
         "ai_provider_configured": settings.AI_PROVIDER,
+        "gemini_key_present": bool(settings.GEMINI_API_KEY),
         "openai_key_present": bool(settings.OPENAI_API_KEY),
         "sandbox_docker_available": has_docker,
         "node_compiler_available": has_node,

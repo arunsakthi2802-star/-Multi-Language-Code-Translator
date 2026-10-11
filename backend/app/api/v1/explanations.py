@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.schemas import ExplanationRequest, ExplanationResponse
 from app.models.models import User
 from app.api.dependencies import get_current_user_optional
+from app.providers.gemini import GeminiProvider
 from app.providers.openai_compatible import OpenAICompatibleProvider
 from app.providers.ollama import OllamaProvider
 from app.core.config import settings
@@ -19,7 +20,12 @@ async def explain_code(
     )
 
     try:
-        if provider_name == "ollama":
+        if provider_name == "gemini":
+            provider = GeminiProvider(
+                model=current_user.settings.custom_model if current_user and current_user.settings and current_user.settings.custom_model else None
+            )
+            data = await provider.explain(req.code, req.language, req.mode)
+        elif provider_name == "ollama":
             provider = OllamaProvider(
                 base_url=current_user.settings.custom_base_url if current_user and current_user.settings else None,
                 model=current_user.settings.custom_model if current_user and current_user.settings else None

@@ -113,6 +113,7 @@ export const Settings: React.FC = () => {
               onChange={(e) => setTestProvider(e.target.value)}
               className="w-full bg-[#181c2b] border border-[#2b3046] rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none"
             >
+              <option value="gemini">Google Gemini (API Key)</option>
               <option value="openai">OpenAI / Compatible</option>
               <option value="ollama">Ollama (Local Daemon)</option>
               <option value="rule_based">Rule-Based Engine</option>
@@ -127,7 +128,7 @@ export const Settings: React.FC = () => {
               type="text"
               value={testBaseUrl}
               onChange={(e) => setTestBaseUrl(e.target.value)}
-              placeholder={testProvider === 'ollama' ? 'http://localhost:11434' : 'https://api.openai.com/v1'}
+              placeholder={testProvider === 'ollama' ? 'http://localhost:11434' : testProvider === 'gemini' ? 'https://generativelanguage.googleapis.com' : 'https://api.openai.com/v1'}
               className="w-full bg-[#181c2b] border border-[#2b3046] rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none"
             />
           </div>
@@ -138,13 +139,13 @@ export const Settings: React.FC = () => {
               type="text"
               value={testModel}
               onChange={(e) => setTestModel(e.target.value)}
-              placeholder={testProvider === 'ollama' ? 'codellama' : 'gpt-4o-mini'}
+              placeholder={testProvider === 'ollama' ? 'codellama' : testProvider === 'gemini' ? 'gemini-1.5-flash' : 'gpt-4o-mini'}
               className="w-full bg-[#181c2b] border border-[#2b3046] rounded-lg px-3 py-2 text-xs text-gray-200 focus:outline-none"
             />
           </div>
         </div>
 
-        {testProvider === 'openai' && (
+        {(testProvider === 'openai' || testProvider === 'gemini') && (
           <div>
             <label className="block text-xs font-medium text-gray-300 mb-1">
               Test Custom API Key (Leave blank to test server-configured key)
@@ -155,7 +156,7 @@ export const Settings: React.FC = () => {
                 type="password"
                 value={testKey}
                 onChange={(e) => setTestKey(e.target.value)}
-                placeholder="sk-..."
+                placeholder={testProvider === 'gemini' ? 'AIzaSy...' : 'sk-...'}
                 className="w-full bg-[#181c2b] border border-[#2b3046] rounded-lg pl-9 pr-3 py-2 text-xs text-gray-200 font-mono focus:outline-none"
               />
             </div>
@@ -276,11 +277,12 @@ export const Settings: React.FC = () => {
               Default AI Engine
             </label>
             <select
-              value={settings.ai_provider || 'openai'}
+              value={settings.ai_provider || 'gemini'}
               onChange={(e) => setSettings({ ...settings, ai_provider: e.target.value })}
               className="w-full bg-[#181c2b] border border-[#2b3046] rounded-lg px-3 py-2 text-xs text-gray-200"
             >
-              <option value="openai">OpenAI (Server / gpt-4o-mini)</option>
+              <option value="gemini">Google Gemini (Default)</option>
+              <option value="openai">OpenAI (gpt-4o-mini)</option>
               <option value="rule_based">Rule-Based Fallback</option>
               <option value="ollama">Ollama (Local)</option>
             </select>

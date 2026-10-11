@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.models.models import Translation, User
 from app.schemas.schemas import TranslationRequest, TranslationResponse
+from app.providers.gemini import GeminiProvider
 from app.providers.openai_compatible import OpenAICompatibleProvider
 from app.providers.ollama import OllamaProvider
 from app.providers.rule_based import RuleBasedTranslationProvider
@@ -47,7 +48,7 @@ class TranslationService:
             if not RuleBasedTranslationProvider.is_pair_supported(req.source_language, req.target_language):
                 raise ValueError(
                     f"Rule-based engine only supports Python <-> JavaScript/TypeScript and Python -> C. "
-                    f"Please switch provider to OpenAI or Ollama to translate from {source_info.name} to {target_info.name}."
+                    f"Please switch provider to Gemini, OpenAI or Ollama to translate from {source_info.name} to {target_info.name}."
                 )
             result = RuleBasedTranslationProvider.translate(
                 req.source_code,
@@ -61,6 +62,43 @@ class TranslationService:
             explanation = "Deterministic rule-based translation applied."
             status = "partial" if result.is_partial else "completed"
             model_name = "rule_based_engine_v1"
+
+        elif provider_name == "gemini":
+            gemini_provider = GeminiProvider(
+                model=current_user.settings.custom_model if current_user and current_user.settings and current_user.settings.custom_model else None
+            )
+            try:
+                res = await gemini_provider.translate(
+                    source_code=req.source_code,
+                    source_lang=source_info.name,
+                    target_lang=target_info.name,
+                    style=req.style,
+                    options=req.options.dict() if req.options else {}
+                )
+                translated_code = res.get("translated_code", "")
+                warnings = res.get("warnings", [])
+                conversion_notes = res.get("conversion_notes", [])
+                explanation = res.get("explanation", "")
+                suggested_tests = res.get("suggested_tests", [])
+                model_name = gemini_provider.model
+            except Exception as e:
+                # Fallback to rule based if possible
+                if RuleBasedTranslationProvider.is_pair_supported(req.source_language, req.target_language):
+                    try:
+                        rb_res = RuleBasedTranslationProvider.translate(
+                            req.source_code, req.source_language, req.target_language, req.options.dict() if req.options else {}
+                        )
+                        translated_code = rb_res.translated_code
+                        warnings = [f"Gemini provider failed ({str(e)}). Used deterministic rule-based fallback instead."] + rb_res.warnings
+                        conversion_notes = rb_res.notes
+                        explanation = "Fell back to rule-based engine due to Gemini error."
+                        provider_name = "rule_based_fallback"
+                        model_name = "rule_based_v1"
+                        status = "partial" if rb_res.is_partial else "completed"
+                    except Exception:
+                        raise RuntimeError(f"Translation failed: {str(e)}")
+                else:
+                    raise RuntimeError(f"Gemini Translation failed: {str(e)}")
 
         elif provider_name == "ollama":
             ollama_provider = OllamaProvider(
@@ -82,11 +120,10 @@ class TranslationService:
                 suggested_tests = res.get("suggested_tests", [])
                 model_name = ollama_provider.model
             except Exception as e:
-                # If rule based fallback is possible for this pair, we can note it
                 status = "failed"
                 raise RuntimeError(f"Ollama translation failed: {str(e)}")
 
-        else: # default: openai
+        else: # openai
             ai_provider = OpenAICompatibleProvider(
                 base_url=current_user.settings.custom_base_url if current_user and current_user.settings and current_user.settings.custom_base_url else None,
                 model=current_user.settings.custom_model if current_user and current_user.settings and current_user.settings.custom_model else None
